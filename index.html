@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Tetris with Cute Animals</title>
+<title>Tetris Rainbow Blocks</title>
 <style>
   body {
     display: flex;
@@ -11,13 +11,13 @@
     align-items: center;
     justify-content: center;
     height: 100vh;
-    background: yellow;
+    background: gray; /* 전체 배경색 변경 */
     margin: 0;
     color: #000;
     font-family: sans-serif;
   }
   canvas {
-    background: yellow;
+    background: white; /* 캔버스 배경 흰색 */
   }
   #scoreBoard {
     margin-top: 20px;
@@ -52,37 +52,22 @@ const preview = document.getElementById('preview');
 const previewCtx = preview.getContext('2d');
 previewCtx.scale(14, 14);
 
-// 각 블록 번호에 해당하는 색상 + 동물 캐릭터 이미지 URL
-const blockStyles = {
-  1: {color: '#FF6B6B', img: 'https://i.imgur.com/5n2mJd4.png'}, // 고양이
-  2: {color: '#4ECDC4', img: 'https://i.imgur.com/TKXujvK.png'}, // 강아지
-  3: {color: '#FFD93D', img: 'https://i.imgur.com/Rt9pUej.png'}, // 토끼
-  4: {color: '#6C5CE7', img: 'https://i.imgur.com/yrtMZVJ.png'}, // 판다
-  5: {color: '#F368E0', img: 'https://i.imgur.com/4yK5XW3.png'}, // 여우
-  6: {color: '#00B894', img: 'https://i.imgur.com/5AsQmI5.png'}, // 곰
-  7: {color: '#E17055', img: 'https://i.imgur.com/B6fqW5n.png'}  // 코알라
+// 블럭 색상 (무지개 + 그라데이션)
+const blockColors = {
+  1: ['#FF0000', '#FF7F7F'], // 빨강
+  2: ['#FF7F00', '#FFD27F'], // 주황
+  3: ['#FFFF00', '#FFFFB3'], // 노랑
+  4: ['#00FF00', '#B3FFB3'], // 초록
+  5: ['#0000FF', '#7F7FFF'], // 파랑
+  6: ['#4B0082', '#9370DB'], // 남색
+  7: ['#8B00FF', '#D580FF']  // 보라
 };
 
-let patterns = {};
-function loadPatterns(callback) {
-  let loadedCount = 0;
-  const total = Object.keys(blockStyles).length;
-  for (let key in blockStyles) {
-    const img = new Image();
-    img.src = blockStyles[key].img;
-    img.onload = () => {
-      const tempCanvas = document.createElement('canvas');
-      tempCanvas.width = 20;
-      tempCanvas.height = 20;
-      const tempCtx = tempCanvas.getContext('2d');
-      tempCtx.fillStyle = blockStyles[key].color;
-      tempCtx.fillRect(0, 0, 20, 20);
-      tempCtx.drawImage(img, 2, 2, 16, 16);
-      patterns[key] = context.createPattern(tempCanvas, 'repeat');
-      loadedCount++;
-      if (loadedCount === total) callback();
-    };
-  }
+function createGradient(ctx, x, y, w, h, colors) {
+  const grad = ctx.createLinearGradient(x, y, x + w, y + h);
+  grad.addColorStop(0, colors[0]);
+  grad.addColorStop(1, colors[1]);
+  return grad;
 }
 
 let score = 0;
@@ -101,7 +86,7 @@ function drawMatrix(matrix, offset, ctx = context) {
   matrix.forEach((row, y) => {
     row.forEach((value, x) => {
       if (value !== 0) {
-        ctx.fillStyle = patterns[value];
+        ctx.fillStyle = createGradient(ctx, x + offset.x, y + offset.y, 1, 1, blockColors[value]);
         ctx.fillRect(x + offset.x, y + offset.y, 1, 1);
       }
     });
@@ -241,7 +226,7 @@ function arenaSweep() {
 }
 
 function draw() {
-  context.fillStyle = 'yellow';
+  context.fillStyle = 'white'; // 캔버스 배경 흰색
   context.fillRect(0, 0, canvas.width, canvas.height);
   drawMatrix(arena, {x:0, y:0});
   drawMatrix(player.matrix, player.pos);
@@ -281,11 +266,9 @@ document.addEventListener('keydown', event => {
   else if (event.keyCode === 32) hardDrop();
 });
 
-loadPatterns(() => {
-  playerReset();
-  updateScore();
-  update();
-});
+playerReset();
+updateScore();
+update();
 </script>
 </body>
 </html>
